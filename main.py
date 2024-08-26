@@ -29,19 +29,18 @@
 
 import random
 import pandas as pd
+from tqdm import tqdm
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 from point import Point
 
 # Hyperparameters
-# N_POINTS = 1000
-# N_FEATURES = 2
-# N_CLUSTERS = 3
-
 EPOCHS = 100
+LR = 1e-1
 SAMPLE_PERCENTAGE = 0.1
 N_INTERACTIONS = 10
-# SAMPLE_SIZE = int(N_POINTS * SAMPLE_PERCENTAGE)
+ANIMATION_DURATION = 30000 # ms
 
 
 def plot_points(X, y, title, ax):
@@ -50,6 +49,11 @@ def plot_points(X, y, title, ax):
     ax.set_ylabel('Feature 2')
     ax.set_title(title)
     return scatter
+
+
+def update_plot(frame, X, states, scatter):
+    scatter.set_array(states[frame])
+    return scatter,
 
 
 def get_dataset(path, header=None, sep='\t'):
@@ -61,42 +65,56 @@ def get_dataset(path, header=None, sep='\t'):
     return X, y
 
 
-def instantiate_points(X):
-    return [Point(features=x, label=i) for i, x in enumerate(X)]
-
-
-# relationships are annalog to weights
-def initialize_relationships(points):
+def fit(points):
     for point in points:
-        for other in points:
-            point.relationships[other] = random.uniform(0.0, 1.0)
+        for _ in range(N_INTERACTIONS):
+            other = random.choice(points)
+            if other.label == point.label:
+                continue
 
+            point.dispute(other)
+    
+    for point in points:
+        point.update_weights(LR)
+        point.compute_best_label()
+
+    for point in points:
         point.update_label()
-
-
-# this is annalog to the predict method
-def combat(points):
-    pass
+        point.update_teammates()
+        point.compute_strength()
 
 
 def train(points):
     sample_size = int(len(points) * SAMPLE_PERCENTAGE)
-    for epoch in range(EPOCHS):
+    states = [[point.label for point in points]]
+    for _ in tqdm(range(EPOCHS), desc="Training Progress"):
         sample = random.sample(points, sample_size)
-        combat(points)
-        
-
+        fit(sample)
+        states.append([point.label for point in points])
+    return states
+      
 
 if __name__ == '__main__':
+    # Setup
     X, y = get_dataset('datasets/flame.csv')
-    points = instantiate_points(X)
-    initialize_relationships(points)
+    points = Point.create_points(X)
 
-    train(points)
+    print([point.label for point in points])
 
+    # Train
+    states = train(points)
+
+    # Plot
+    print('Plotting...')
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     plot_points(X, y, 'Original Labels', axs[0])
-    predicted_labels = [point.label for point in points]
-    plot_points(X, predicted_labels, 'Predicted Labels', axs[1])
+
+    scatter = plot_points(X, [point.label for point in points], 'Clustering Evolution', axs[1])
+
+    interval = int(ANIMATION_DURATION // EPOCHS)
+    if interval < 200:
+        interval = 200
+
+    ani = animation.FuncAnimation(fig, update_plot, frames=EPOCHS, fargs=(X, states, scatter), interval=interval, blit=True)
+    ani.save('clustering_evolution.gif', writer='imagemagick')
     plt.show()
-    
