@@ -1,4 +1,4 @@
-# Master's Project
+# A Novel Reinforcement Learning Based Clustering Approach
 
 ## Methodology
 
@@ -35,8 +35,8 @@ will be proportional to the dispute result (e.g.: update * dispute_result)
 
 ## Execution
 
-![Flame Evolution](flame_evolution.gif)
-![Blobs Evolution](blobs_evolution.gif)
+![Flame Evolution](results/flame_evolution.gif)
+![Blobs Evolution](results/blobs_evolution.gif)
 
 ## References
 
