@@ -2,8 +2,8 @@
 
 ## Methodology
 
-The idea is to create a clustering algorithm based in relationships
-Each point goal is to gatter alies to survive a combat
+The goal is to create a clustering algorithm based in relationships between agents.
+Each point goal is to gatter alies to survive a combat.
 When a point survive a combat, it strenghtens its relationships with its
 teammates.
 If a point loses a combat, it will weaken its relationships with its 
