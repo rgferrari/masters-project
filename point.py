@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-class Point():
+class Point:
     points = []
 
     def __init__(self, features: list, label: int):
@@ -37,6 +37,8 @@ class Point():
 
         for point in points:
             point.update_label()
+
+        for point in points:
             point.update_teammates()
             point.compute_strength()
 
@@ -73,16 +75,20 @@ class Point():
 
 
     def move_towards_team(self, step_size: float):
-        """Move the point towards the average position of the teammates, excluding those beyond one standard deviation."""
+        """Move the point towards the average position of the teammates, 
+        excluding those beyond one standard deviation.
+        """
 
         if not self.teammates:
             return
 
         # Calculate the average position
-        avg_position = np.mean([teammate.features for teammate in self.teammates], axis=0)
+        avg_position = np.mean([teammate.features 
+                                for teammate in self.teammates], axis=0)
         
         # Calculate the standard deviation of the positions
-        std_dev = np.std([teammate.features for teammate in self.teammates], axis=0)
+        std_dev = np.std([teammate.features 
+                          for teammate in self.teammates], axis=0)
         
         # Filter teammates within one standard deviation of the average position
         filtered_teammates = [
@@ -94,14 +100,17 @@ class Point():
             return
 
         # Calculate the new average position with the filtered teammates
-        filtered_avg_position = np.mean([teammate.features for teammate in filtered_teammates], axis=0)
+        filtered_avg_position = np.mean(
+            [teammate.features for teammate in filtered_teammates], axis=0
+        )
 
         # Move the point towards the new average position
         self.features = [
-            self.features[i] + step_size * (filtered_avg_position[i] - self.features[i])
+            self.features[i] + step_size * \
+                (filtered_avg_position[i] - self.features[i])
             for i in range(len(self.features))
         ]
-
+        
 
     def compute_best_label(self):
         """Rank the labels according to the weights."""
